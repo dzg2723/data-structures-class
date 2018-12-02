@@ -141,6 +141,7 @@ public class ExpTree {
 					break;
 				}
 			}
+			result = "Infix notation: " + result;
 			return result;
 		}
 	
@@ -164,6 +165,72 @@ public class ExpTree {
 			}
 		}
 		
+		public String toPostfix() {
+			Queue<String> q = new LinkedList<>();
+			toPostfix(root, q);
+			String result = "";
+			String e = q.remove();
+			while (true) {
+				result = result + e + " ";
+				try {
+					e = q.remove();
+				} catch (java.util.NoSuchElementException er) {
+					break;
+				}
+			}
+			result = "Postfix notation: " + result;
+			return result;
+		}
+		
+		private void toPostfix(ExprNode node, Queue<String> queue) {
+			if ( node == null ) return;
+			
+			toPostfix(node.left, queue);
+			
+			toPostfix(node.right, queue);
+			
+			if (node.op == ' ') {
+				queue.add(Integer.toString(node.val));
+			} else {
+				queue.add(Character.toString(node.op));
+			}
+			
+			
+		}
+		
+		public String toPrefix() {
+			Queue<String> q = new LinkedList<>();
+			toPrefix(root, q);
+			String result = "";
+			String e = q.remove();
+			while (true) {
+				result = result + e + " ";
+				try {
+					e = q.remove();
+				} catch (java.util.NoSuchElementException er) {
+					break;
+				}
+			}
+			result = "Prefix notation: " + result;
+			return result;
+		}
+		
+		private void toPrefix(ExprNode node, Queue<String> queue) {
+			if ( node == null ) return;
+			
+			
+			if (node.op == ' ') {
+				queue.add(Integer.toString(node.val));
+			} else {
+				queue.add(Character.toString(node.op));
+			}
+			
+			toPrefix(node.left, queue);
+			
+			toPrefix(node.right, queue);
+			
+		}
+		
 		private int getTreeHeight(ExprNode root) {
 			if (root == null) {
 				return 0;
@@ -180,18 +247,25 @@ public class ExpTree {
 			int tree_height = getTreeHeight(root);
 			System.out.println(tree_height);
 			//start by assuming tree height of 5
-			
+
 		}
 	
 	
 	public static void main(String[] args) {
 		ExpTree tree = new ExpTree();
 		tree.fill("+ * + * 8 7 4 5 * + 2 2 * 3 7");
+		
 		System.out.println(tree);
 		System.out.println(tree.eval());
-		String a = tree.toInfix();
-		System.out.println(a);
-		tree.drawTree();
+		
+		String prefix = tree.toPrefix();
+		String postfix = tree.toPostfix();
+		String infix = tree.toInfix();
+		
+		System.out.println(prefix);
+		System.out.println(postfix);
+		System.out.println(infix);
+		//tree.drawTree();
 	}
 
 }

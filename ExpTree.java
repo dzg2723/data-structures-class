@@ -244,10 +244,126 @@ public class ExpTree {
 		}
 		
 		public void drawTree() {
+			eval(); //Make sure that the tree is filled out.
 			int tree_height = getTreeHeight(root);
-			System.out.println(tree_height);
-			//start by assuming tree height of 5
+			//System.out.print("Tree Height: ");
+			//System.out.println(tree_height);
+			
+			//Handle exceptions
+			if (tree_height == 0) {
+				System.out.println();
+				return;
+			}
+			if (tree_height == 1) {
+				System.out.println(root.val);
+				return;
+			}
+			
+			//Create two queues
+			Queue<ExprNode> node_queue = new LinkedList<>();
+			node_queue.add(root);
+			
+			Queue<Integer> col_queue = new LinkedList<>();
+			int starting_column = (int) (5 * Math.pow(2, tree_height-2));
+			col_queue.add(starting_column);
 
+
+			//https://stackoverflow.com/questions/1235179/simple-way-to-repeat-a-string-in-java
+			//String repeated = new String(new char[100]).replace("\0", "abcde");
+			//System.out.println(repeated);
+			
+
+
+			for (int i = 0; i < tree_height; i++) {
+				
+				//Line 1/3 of the set
+				String line = "";			//Progressively assembled before being printed
+				int operator_counter = 0;	//Records the number of nodes on line that are operators
+				int curr_col = 0;
+				int target_col;
+				ExprNode curr_node;
+				
+				int potent_nodes = (int) (Math.pow(2, i));
+				for (int j = 0; j < potent_nodes; j++) {
+					curr_node = node_queue.remove();
+					if (curr_node == null) {
+						continue;
+					}
+					target_col = col_queue.remove();
+
+					
+					int num_of_spaces = (target_col-1) - curr_col;
+					String spaces = new String(new char[num_of_spaces]).replace("\0", " ");
+				
+					if (curr_node.op == ' ') {
+						line += spaces + curr_node.val;
+						curr_col += num_of_spaces + 1; //+1 to account for value slot
+						
+					} else {
+						line += spaces + curr_node.op + " (" + curr_node.val + ")";
+						int val_digits = Integer.toString(curr_node.val).length();
+						curr_col += num_of_spaces + 3 + val_digits + 1;
+						
+						int step =  (int) (starting_column / Math.pow(2, i+1)); //todo, make it ceil?
+						col_queue.add(target_col - step);
+						col_queue.add(target_col);
+						col_queue.add(target_col + step);
+						
+						operator_counter += 1;
+						
+					}
+					node_queue.add(curr_node.left);
+					node_queue.add(curr_node.right);
+				}
+				
+				System.out.println(line);
+				
+				//Line 2/3 of the set
+				line = "";
+				curr_col = 0;
+				for (int j = 0; j < operator_counter; j++) {
+					target_col = col_queue.remove();
+					int num_of_cols = target_col - curr_col; 			//we include target column as a space
+					String columns = new String(new char[num_of_cols]).replace("\0", " ");
+					line += columns;
+					curr_col += num_of_cols;
+					col_queue.add(target_col);
+					
+					target_col = col_queue.remove();
+					num_of_cols = (target_col-1) - curr_col;
+					columns = new String(new char[num_of_cols]).replace("\0", "_");
+					line += columns + "|";
+					curr_col += num_of_cols + 1;
+					
+					target_col = col_queue.remove();
+					num_of_cols = (target_col-1) - curr_col;
+					//System.out.print("Number of columns: ");
+					//System.out.println(num_of_cols);
+					columns = new String(new char[num_of_cols]).replace("\0", "_");
+					line += columns;
+					curr_col += num_of_cols;
+					col_queue.add(target_col);
+				}
+				System.out.println(line);
+				
+				//Line 3/3 of the set
+				line = "";
+				curr_col = 0;
+				int num_of_cols;
+				for (int j = 0; j < operator_counter*2; j++) {
+					target_col = col_queue.remove();
+					num_of_cols = (target_col-1) - curr_col;
+					//System.out.print("Target: ");
+					//System.out.println(target_col);
+					//System.out.print("Number of columns: ");
+					//System.out.println(num_of_cols);
+					String columns = new String(new char[num_of_cols]).replace("\0", " ");
+					line += columns + "|";
+					curr_col += num_of_cols + 1;
+					col_queue.add(target_col);
+				}
+				System.out.println(line);
+			}
 		}
 	
 	
@@ -256,16 +372,16 @@ public class ExpTree {
 		tree.fill("+ * + * 8 7 4 5 * + 2 2 * 3 7");
 		
 		System.out.println(tree);
-		System.out.println(tree.eval());
+		//System.out.println(tree.eval());
 		
-		String prefix = tree.toPrefix();
-		String postfix = tree.toPostfix();
-		String infix = tree.toInfix();
+		//String prefix = tree.toPrefix();
+		//String postfix = tree.toPostfix();
+		//String infix = tree.toInfix();
 		
-		System.out.println(prefix);
-		System.out.println(postfix);
-		System.out.println(infix);
-		//tree.drawTree();
+		//System.out.println(prefix);
+		//System.out.println(postfix);
+		//System.out.println(infix);
+		tree.drawTree();
 	}
 
 }

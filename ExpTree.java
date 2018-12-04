@@ -32,6 +32,7 @@ public class ExpTree {
 
 		ExprNode root;
 
+		//prints a string of the nodes in the tree
 		public String toString() {
 			return stringify(root);
 		}
@@ -41,6 +42,7 @@ public class ExpTree {
 			return node.toString() + " " + stringify(node.left) + stringify(node.right);
 		}
 
+		//Fills the tree with operators and values given an expression in prefix notation
 		public void fill(String prefixExpr) {
 			root = fill(prefixExpr, new Position());
 		}
@@ -56,36 +58,39 @@ public class ExpTree {
 			
 			//end method once expression has been iterated through
 			if (i.val > prefixExpr.length()) return null;
-
+			
 			//Create operator node connected to next two nodes
 			if (c == '+' || c == '*') {
 				return new ExprNode(c, fill(prefixExpr, i), fill(prefixExpr, i));
-				
-			//c is a number
-			} else {
-				String value = "";	//Place characters into a string for multi-digit numbers
-				value += c;
-				
-				//Look for more digits
-				while (i.val < prefixExpr.length()) {
-					c = prefixExpr.charAt(i.val);
-					
-					//if (next_c == '.'){
-						//do something
-					//}
-					
-					if (c >= '0' && c <= '9') {
-						value += c;
-						i.val++;
-					} else {
-						break;
-					}
-				}
-				return new ExprNode(Integer.parseInt(value));
+			}  
+			
+			//c should be a number at this point. If not, input is bad
+			if (!(c >= '0' && c <= '9')) {
+				System.out.println("Improper input given");
+				System.exit(0);
 			}
+	
+			//c is a number
+			String value = "";	//Place characters into a string for multi-digit numbers
+			value += c;
+			
+			//Look for more digits
+			while (i.val < prefixExpr.length()) {
+				c = prefixExpr.charAt(i.val);
+				if (c >= '0' && c <= '9') {
+					value += c;
+					i.val++;
+				} else { break; }
+			}
+			return new ExprNode(Integer.parseInt(value));
 		}
 
-		public int eval() { return eval(root); }
+		//Fills values of non-leaf nodes
+		public int eval() {
+			int result = eval(root);
+			if (result < 0){ System.out.println("Result is negative, values may have overflowed.");}	//Notify user as to overflow
+			return result; 
+			}
 
 		private int eval(ExprNode node)
 		{
@@ -102,36 +107,36 @@ public class ExpTree {
 		}
 
 		public String toInfix() {
-			Queue<String> q = new LinkedList<>();
-			toInfix(root, q);
-			String result = "";
-			String e = q.remove();
-			while (true) {
-				result = result + e;
-				try {
-					e = q.remove();
-				} catch (java.util.NoSuchElementException er) {
-					break;
-				}
+			Queue<String> q = new LinkedList<>();	//Create a queue
+			toInfix(root, q);						//Fill queue with private method
+			String result = "";	
+			while (q.size() > 0) {					//take items from queue and add them to the string
+				result = result + q.remove();
 			}
 			result = "Infix notation: " + result;
-			return result;
+			return result;							//return result
 		}
 	
 		private void toInfix(ExprNode node, Queue<String> queue) {
+			//For infix, first add left child to queue, then self, then right child
+			
+			//Handle base case
 			if ( node == null ) return;
+			
+			//If node is not a leaf, add parenthesis and call recursive method
 			if (node.left != null || node.right != null) {
 				queue.add("(");
 				toInfix(node.left, queue);
 			}
 			
-			
+			//Add self to the queue
 			if (node.op == ' ') {
 				queue.add(Integer.toString(node.val));
 			} else {
 				queue.add(Character.toString(node.op));
 			}
 			
+			//If node is not a leaf, add parenthesis and call recursive method
 			if (node.left != null || node.right != null) {
 				toInfix(node.right, queue);
 				queue.add(")");
@@ -139,29 +144,27 @@ public class ExpTree {
 		}
 		
 		public String toPostfix() {
-			Queue<String> q = new LinkedList<>();
-			toPostfix(root, q);
+			Queue<String> q = new LinkedList<>();	//Create a queue
+			toPostfix(root, q);						//Fill queue with private method
 			String result = "";
-			String e = q.remove();
-			while (true) {
-				result = result + e + " ";
-				try {
-					e = q.remove();
-				} catch (java.util.NoSuchElementException er) {
-					break;
-				}
+			while (q.size() > 0) {					//take items from queue and add them to the string
+				result = result + q.remove() + " ";
 			}
 			result = "Postfix notation: " + result;
-			return result;
+			return result;							//return result
 		}
 		
 		private void toPostfix(ExprNode node, Queue<String> queue) {
+			//For postfix, first add left child to queue, then right child, then self
+			
+			//Handle base case
 			if ( node == null ) return;
 			
+			//Recursive call to child nodes
 			toPostfix(node.left, queue);
-			
 			toPostfix(node.right, queue);
 			
+			//Add self to queue
 			if (node.op == ' ') {
 				queue.add(Integer.toString(node.val));
 			} else {
@@ -172,46 +175,49 @@ public class ExpTree {
 		}
 		
 		public String toPrefix() {
-			Queue<String> q = new LinkedList<>();
-			toPrefix(root, q);
+			Queue<String> q = new LinkedList<>();	//Create a queue
+			toPrefix(root, q);						//Fill queue with private method
 			String result = "";
-			String e = q.remove();
-			while (true) {
-				result = result + e + " ";
-				try {
-					e = q.remove();
-				} catch (java.util.NoSuchElementException er) {
-					break;
-				}
+			while (q.size() > 0) {					//take items from queue and add them to the string
+				result = result + q.remove() + " ";
 			}
 			result = "Prefix notation: " + result;
-			return result;
+			return result;							//return result
 		}
 		
 		private void toPrefix(ExprNode node, Queue<String> queue) {
+			//For prefix, first add self to queue, then left child, then right child
+			
+			//Handle base case
 			if ( node == null ) return;
 			
-			
+			//Add self to queue
 			if (node.op == ' ') {
 				queue.add(Integer.toString(node.val));
 			} else {
 				queue.add(Character.toString(node.op));
 			}
 			
+			//Recursive call to child nodes
 			toPrefix(node.left, queue);
-			
 			toPrefix(node.right, queue);
 			
 		}
 		
+		//Returns height of tree
 		private int getTreeHeight(ExprNode root) {
-			if (root == null) {
-				return 0;
-			}
+			
+			//Handle base case
+			if (root == null) { return 0; }
+			
+			//Recursive call to child nodes
 			int h_left = getTreeHeight(root.left);
 			int h_right = getTreeHeight(root.right);
 			
+			//Choose larger height of child nodes and add one for self
 			int height = Math.max(h_left, h_right) + 1;
+			
+			//return the value
 			return height;
 			
 		}
@@ -219,8 +225,10 @@ public class ExpTree {
 		public void drawTree() {
 			//https://stackoverflow.com/questions/1235179/simple-way-to-repeat-a-string-in-java
 			eval(); //Make sure that the tree is filled out.
+			
+			//Get tree height for error prevention
 			int tree_height = getTreeHeight(root);
-			System.out.println("Height: " + tree_height);
+			System.out.println("Height of Tree: " + tree_height);
 			
 			//Handle exceptions
 			if (tree_height == 0) {
@@ -229,6 +237,11 @@ public class ExpTree {
 			}
 			if (tree_height == 1) {
 				System.out.println(root.val);
+				return;
+			}
+			if (tree_height > 10) {
+				System.out.println("Your expression tree is of height " + tree_height);
+				System.out.println("Trees of over height 10 will not be displayed due to the large amount of space required.");
 				return;
 			}
 			
@@ -250,8 +263,8 @@ public class ExpTree {
 				int target_col;				//Significant slots in the line string
 				ExprNode curr_node;			//Current node being formatted in the line
 				
-				int potent_nodes = (int) (Math.pow(2, i)); 	//Possible amount of nodes that may exist at current depth
-				for (int j = 0; j < potent_nodes; j++) {
+				int curr_queue_size = node_queue.size();
+				for (int j = 0; j < curr_queue_size; j++) {
 					
 					//Get the next node, skip iteration if null
 					curr_node = node_queue.remove();
@@ -331,24 +344,25 @@ public class ExpTree {
 	
 	public static void main(String[] args) {
 		
+		//Get user input
 		Scanner console_input = new Scanner(System.in);
 		System.out.println("Please enter a prefix notation with integers");
 		String user_expression = console_input.nextLine();
 		
+		//Create and fill tree
 		ExpTree tree = new ExpTree();
-		//tree.fill("+ * + * 8 7 4 5 * + 2 2 * 3 7");
 		tree.fill(user_expression);
 		
-		System.out.println(tree);
+		//Draw the tree
 		tree.drawTree();
 		
-		String prefix = tree.toPrefix();
-		String postfix = tree.toPostfix();
-		String infix = tree.toInfix();
+		//Display expression in different notations
+		System.out.println(tree.toPrefix());
+		System.out.println(tree.toPostfix());
+		System.out.println(tree.toInfix());
 		
-		System.out.println(prefix);
-		System.out.println(postfix);
-		System.out.println(infix);
+		//Show answer to expression
+		System.out.println("Solution: " + tree.eval());
 	}
 
 }

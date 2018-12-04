@@ -1,3 +1,11 @@
+// Darren Good - 12/4/18
+// Enhancements:
+//		Allows subtraction
+//		Allows free use of spaces
+//		Allows multi-digit integers
+//		Extra symbols in tree representation to show structure
+//		Draws tree vertically 
+
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.LinkedList;
@@ -51,7 +59,7 @@ public class ExpTree {
 			
 			//loop through until c is an operator or number
 			char c = ' ';
-			while (i.val < prefixExpr.length() && c != '+' && c != '*' && !(c >= '0' && c <= '9')) {
+			while (i.val < prefixExpr.length() && c != '+' && c != '*' && c!= '-' && !(c >= '0' && c <= '9')) {
 				c = prefixExpr.charAt(i.val);
 				i.val++;
 			}
@@ -60,7 +68,7 @@ public class ExpTree {
 			if (i.val > prefixExpr.length()) return null;
 			
 			//Create operator node connected to next two nodes
-			if (c == '+' || c == '*') {
+			if (c == '+' || c == '*' || c == '-') {
 				return new ExprNode(c, fill(prefixExpr, i), fill(prefixExpr, i));
 			}  
 			
@@ -86,11 +94,8 @@ public class ExpTree {
 		}
 
 		//Fills values of non-leaf nodes
-		public int eval() {
-			int result = eval(root);
-			if (result < 0){ System.out.println("Result is negative, values may have overflowed.");}	//Notify user as to overflow
-			return result; 
-			}
+		public int eval() { return eval(root);}
+
 
 		private int eval(ExprNode node)
 		{
@@ -225,7 +230,7 @@ public class ExpTree {
 			
 			//Get tree height for error prevention
 			int tree_height = getTreeHeight(root);
-			System.out.println("Height of Tree: " + tree_height);
+			System.out.println("Your expression tree is of height " + tree_height);
 			
 			//Handle exceptions
 			if (tree_height == 0) {
@@ -237,8 +242,8 @@ public class ExpTree {
 				return;
 			}
 			if (tree_height > 10) {
-				System.out.println("Your expression tree is of height " + tree_height);
 				System.out.println("Trees of over height 10 will not be displayed due to the large amount of space required.");
+				System.out.println("Note: Solutions of very large trees may also overflow, giving an invalid result.");
 				return;
 			}
 			
@@ -343,7 +348,7 @@ public class ExpTree {
 		
 		//Get user input
 		Scanner console_input = new Scanner(System.in);
-		System.out.println("Please enter a prefix notation with integers");
+		System.out.println("Please enter a prefix notation expression with integers");
 		String user_expression = console_input.nextLine();
 		
 		//Create and fill tree
@@ -359,7 +364,7 @@ public class ExpTree {
 		System.out.println(tree.notate("Infix"));
 		
 		//Show answer to expression
-		System.out.println("Solution: " + tree.eval());
+		System.out.println("Expression value: " + tree.eval());
 	}
 
 }

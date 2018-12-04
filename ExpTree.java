@@ -105,16 +105,35 @@ public class ExpTree {
 				node.val = a-b;
 			return node.val;
 		}
-
-		public String toInfix() {
-			Queue<String> q = new LinkedList<>();	//Create a queue
-			toInfix(root, q);						//Fill queue with private method
-			String result = "";	
-			while (q.size() > 0) {					//take items from queue and add them to the string
-				result = result + q.remove();
+		
+		public String notate(String form) {
+			
+			//Create a queue and string to store the result in
+			Queue<String> q = new LinkedList<>();
+			String result;
+			
+			//Determine notation and fill queue with private method
+			if (form.toLowerCase().startsWith("in")){
+				result = "Infix notation: ";
+				toInfix(root, q);
+			} else if (form.toLowerCase().startsWith("pre")) {
+				result = "Prefix notation: ";
+				toPrefix(root, q);
+			} else {
+				result = "Postfix notation: ";
+				toPostfix(root, q);
 			}
-			result = "Infix notation: " + result;
-			return result;							//return result
+			
+			//take items from queue and add them to the string
+			while (q.size() > 0) {
+				if (form.toLowerCase().startsWith("in")){
+					result += q.remove();					//No extra space included for infix notation
+				} else {
+					result += q.remove() + " ";				//Space out elements in prefix/postfix
+				}
+			}
+
+			return result;
 		}
 	
 		private void toInfix(ExprNode node, Queue<String> queue) {
@@ -143,17 +162,6 @@ public class ExpTree {
 			}
 		}
 		
-		public String toPostfix() {
-			Queue<String> q = new LinkedList<>();	//Create a queue
-			toPostfix(root, q);						//Fill queue with private method
-			String result = "";
-			while (q.size() > 0) {					//take items from queue and add them to the string
-				result = result + q.remove() + " ";
-			}
-			result = "Postfix notation: " + result;
-			return result;							//return result
-		}
-		
 		private void toPostfix(ExprNode node, Queue<String> queue) {
 			//For postfix, first add left child to queue, then right child, then self
 			
@@ -172,17 +180,6 @@ public class ExpTree {
 			}
 			
 			
-		}
-		
-		public String toPrefix() {
-			Queue<String> q = new LinkedList<>();	//Create a queue
-			toPrefix(root, q);						//Fill queue with private method
-			String result = "";
-			while (q.size() > 0) {					//take items from queue and add them to the string
-				result = result + q.remove() + " ";
-			}
-			result = "Prefix notation: " + result;
-			return result;							//return result
 		}
 		
 		private void toPrefix(ExprNode node, Queue<String> queue) {
@@ -357,9 +354,9 @@ public class ExpTree {
 		tree.drawTree();
 		
 		//Display expression in different notations
-		System.out.println(tree.toPrefix());
-		System.out.println(tree.toPostfix());
-		System.out.println(tree.toInfix());
+		System.out.println(tree.notate("Prefix"));
+		System.out.println(tree.notate("Postfix"));
+		System.out.println(tree.notate("Infix"));
 		
 		//Show answer to expression
 		System.out.println("Solution: " + tree.eval());
